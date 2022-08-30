@@ -6,12 +6,12 @@ contfiguras = 0;
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%Lendo as informações e salvando em arrays
+%%Lendo as informacoes e salvando em arrays
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load("Dados.mat")
 
-
+SaidaReal = SIRpd;
 %%Visualizando os dados coletados
 
 t = (0:1:length(R)-1);
@@ -22,11 +22,7 @@ figure(contfiguras)
 
 plot(t,I,t,S,t,R);
 
-contfiguras = contfiguras+1;
-figure(contfiguras)
 
-
-plot(t,I,"o",t,S,"o",t,R,"o");
 
 
 %%
@@ -36,52 +32,62 @@ plot(t,I,"o",t,S,"o",t,R,"o");
 
 t = (0:1:length(R)-1);
 
-%r=média+variancia*R(t,I)
+%r=media+variancia*R(t,I)
 
 
-%desvios padrão
+%desvios padr�o
 std(I);
 std(R);
 std(S);
 %%%
+%{
 
+correto que d� erro
 Sdn = 0+std(S)/10*rand(1,length(S));
 Idn = 0+std(I)/5*rand(1,length(S)); 
 Rdn = 0+std(R)/10*rand(1,length(S));
-
-%%Cortando
-%{
-Sdn = Sdn(0:length(S));
-Idn = Sdn(0:length(S));
-Rdn = Sdn(0:length(S));
 %}
 
 
+%incorreto que funciona
+Sdn = rand(1,length(S));
+Idn = rand(1,length(S)); 
+Rdn = rand(1,length(S));
+
+%% transformando em colunas
+Sdn = Sdn(:);
+Idn = Idn(:);
+Rdn = Rdn(:);
+
+%controle dados txt
 
 %%%%% Adicionando
-
 
 s = S + Sdn;
 i = I + Idn;
 r = R + Rdn;
 
+%{
+s = inv(S) + Sdn;
+i = inv(I) + Idn;
+r = inv(R) + Rdn;
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Visualizando
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
+%{
 contfiguras = contfiguras+1;
 figure(contfiguras)
 plot(t,s,"o")
-hold
+hold on
 plot(t,i,"o")
-hold
 plot(t,r,"o")
-
-
-
+hold off
+%}
+%{
 contfiguras = contfiguras+1;
 figure(contfiguras)
 
@@ -95,23 +101,21 @@ figure(contfiguras)
 
 plot(t,i,"-",t,s,"-",t,r,"-")
 
-
+%}
 contfiguras = contfiguras+1;
 figure(contfiguras)
 
 
 plot(t,i,t,s,t,r)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Voltar
-%NAS FUNÇÕES SIRmodel || SIRsim
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CONDIÇÕES INICIAIS
+%% CONDICOES INICIAIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %COMANDO sim
-%Tamanho da populção - N
+%Tamanho da populacao - N
 N = 500;
 
 %Valores iniciais 
@@ -119,7 +123,7 @@ I0 = 1 ;
 R0 = 0;
 S0 = N - I0;
 
-%Vetor de condições iniciais
+%Vetor de condicoes iniciais
 
 y0 = [S0, I0, R0];  
 
@@ -131,12 +135,33 @@ beta = theta0(1);
 rv = theta0(2);
 
 
-%Definição do conjunto de equações diferencias não lineares que formam o modelo.
+%Definicao do conjunto de equacoes diferencias nao lineares que formam o modelo.
 
 t = linspace(0, 1000, 1000);
 
-%=sim('Aula1',[Beta,r])
-%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Simulador
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%ErroQuadratico(X,SaidaReal,t,EntradaReal),theta0);
+
+X = fminsearch(@(x) ErroQuadratico(x,SaidaReal,t) ,theta0);
+
+beta = X(1)
+
+rv = X(2)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Visualizando
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Valores de beta e r achados anteriormente
+beta = X(1)
+rv = X(2)
+
+%%{
 mdl = 'Aula1';
 load_system(mdl)
 cs = getActiveConfigSet(mdl);
@@ -180,34 +205,6 @@ xlabel('tempo');
 ylabel('Pessoas')
 hold
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%{
-clear ans
-clear contfiguras
-clear i
-clear I
-clear Idn
-clear N
-clear r
-clear R
-clear Rdn
-clear s
-clear S
-clear Sdn
-clear t
-clear theta0
-clear y0
-
-
-%}
-
-%{
-
-subplot(2,1,2);plot(f,abs(Dn),'ko');
-title('Serie de Fourier do sinal g(t) -- To = 100s');
-xlabel('Frequencia em Hz');
-ylabel('Amplitude em  volts')
-hold
 
 %}
 
