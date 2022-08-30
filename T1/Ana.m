@@ -16,6 +16,7 @@ SaidaReal = SIRpd;
 
 t = (0:1:length(R)-1);
 
+%{
 contfiguras = contfiguras+1;
 figure(contfiguras)
 
@@ -23,11 +24,17 @@ figure(contfiguras)
 plot(t,I,t,S,t,R);
 
 
+contfiguras = contfiguras+1;
+figure(contfiguras)
+hold on
+scatter(t,I,"*")
+scatter(t,R,"+")
+scatter(t,S)
+hold off
 
-
-%%
+%}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%Gerando o ruido & addicionando aos dados
+%% Gerando o ruido & addicionando aos dados
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 t = (0:1:length(R)-1);
@@ -40,19 +47,13 @@ std(I);
 std(R);
 std(S);
 %%%
-%{
 
-correto que dá erro
+
 Sdn = 0+std(S)/10*rand(1,length(S));
 Idn = 0+std(I)/5*rand(1,length(S)); 
 Rdn = 0+std(R)/10*rand(1,length(S));
-%}
 
 
-%incorreto que funciona
-Sdn = rand(1,length(S));
-Idn = rand(1,length(S)); 
-Rdn = rand(1,length(S));
 
 %% transformando em colunas
 Sdn = Sdn(:);
@@ -102,19 +103,28 @@ figure(contfiguras)
 plot(t,i,"-",t,s,"-",t,r,"-")
 
 %}
+
+%{
 contfiguras = contfiguras+1;
 figure(contfiguras)
 
 
 plot(t,i,t,s,t,r)
+%}
 
+contfiguras = contfiguras+1;
+figure(contfiguras)
+hold on
+scatter(t,i,"*")
+scatter(t,r,"+")
+scatter(t,s)
+hold off
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% CONDICOES INICIAIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%COMANDO sim
 %Tamanho da populacao - N
 N = 500;
 
@@ -130,14 +140,10 @@ y0 = [S0, I0, R0];
 
 %%%%%%%% Beta e r
 theta0 = [1e-4,1e-2];% valores iniciais
-beta = theta0(1);
-
-rv = theta0(2);
-
 
 %Definicao do conjunto de equacoes diferencias nao lineares que formam o modelo.
 
-t = linspace(0, 1000, 1000);
+%t = linspace(0, 1000, 1000);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,11 +152,8 @@ t = linspace(0, 1000, 1000);
 
 %%ErroQuadratico(X,SaidaReal,t,EntradaReal),theta0);
 
-X = fminsearch(@(x) ErroQuadratico(x,SaidaReal,t) ,theta0);
+X = fminsearch(@(x) ErroQuadratico(x,SaidaReal,t,y0) ,theta0);
 
-beta = X(1)
-
-rv = X(2)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,6 +165,8 @@ beta = X(1)
 rv = X(2)
 
 %%{
+
+%% simulando com os valores achados
 mdl = 'Aula1';
 load_system(mdl)
 cs = getActiveConfigSet(mdl);
@@ -171,13 +176,13 @@ simOut = sim(mdl, mdl_cs);
 
 
 
-%%
+%% Output da simulacao
 rSimulador = simOut.logsout{3}.Values.Data ; 
 sSimulador = simOut.logsout{1}.Values.Data  ;
 iSimulador = simOut.logsout{2}.Values.Data  ;
 tSimulador = simOut.logsout{2}.Values.Time  ;
 
-%%
+%% Visualizando simulink com os coeficientes corretos e os dados antigos
 contfiguras = contfiguras+1;
 figure(contfiguras)
 
